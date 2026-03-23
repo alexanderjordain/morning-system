@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Morning System">
+<meta name="theme-color" content="#f9f8f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)">
+<title>Morning System</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f9f8f6; --surface: #ffffff; --border: rgba(0,0,0,0.08);
+  --text: #1a1a1a; --muted: #888;
+  --green-bg: #edf7f0; --green-text: #1a6b3c;
+  --blue-bg: #e8f0fb; --blue-text: #1a4a8a;
+  --amber-bg: #fdf3e0; --amber-text: #7a4f00;
+  --gray-bg: #f0efed; --gray-text: #444;
+  --red-bg: #fdf0f0; --red-text: #8a1a1a;
+  --radius: 14px; --radius-sm: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111110; --surface: #1c1c1a; --border: rgba(255,255,255,0.08);
+    --text: #f0ede8; --muted: #666;
+    --green-bg: #0d2e1a; --green-text: #5ecf8a;
+    --blue-bg: #0d1e3a; --blue-text: #7ab4f5;
+    --amber-bg: #2a1e08; --amber-text: #f5c060;
+    --gray-bg: #242422; --gray-text: #aaa;
+    --red-bg: #2a0d0d; --red-text: #f58080;
+  }
+}
+body {
+  background: var(--bg); color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px; line-height: 1.6; min-height: 100vh;
+  padding: env(safe-area-inset-top, 16px) 0 env(safe-area-inset-bottom, 32px);
+  overflow-x: hidden;
+}
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px; }
+header { padding: 24px 16px 12px; max-width: 600px; margin: 0 auto; }
+.date-line { font-size: 11px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+h1 { font-size: 22px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+.section-title { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 20px 16px 8px; max-width: 600px; margin: 0 auto; }
+.card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 10px; }
+.card-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.verse-ref { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+.verse-text { font-size: 16px; line-height: 1.65; color: var(--text); font-style: italic; }
+.mindset-text { font-size: 15px; line-height: 1.78; color: var(--text); }
+.track-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-bottom: 12px; }
+.track-eta { background: var(--green-bg); color: var(--green-text); }
+.track-market { background: var(--blue-bg); color: var(--blue-text); }
+.track-operator { background: var(--amber-bg); color: var(--amber-text); }
+.track-mindset { background: var(--gray-bg); color: var(--gray-text); }
+.learn-text { font-size: 15px; line-height: 1.78; color: var(--text); }
+.action-box { background: var(--bg); border-radius: var(--radius-sm); border: 0.5px solid var(--border); padding: 14px 16px; font-size: 14px; line-height: 1.65; color: var(--text); margin-top: 8px; }
+.link-row { display: flex; align-items: flex-start; gap: 14px; }
+.link-icon { width: 40px; height: 40px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; }
+.icon-podcast { background: var(--red-bg); }
+.icon-coffee { background: var(--amber-bg); }
+.link-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; line-height: 1.4; }
+.link-sub { font-size: 13px; color: var(--muted); line-height: 1.4; }
+.link-tap { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 600; color: var(--blue-text); background: var(--blue-bg); padding: 4px 12px; border-radius: 20px; text-decoration: none; }
+.goals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.goal-pill { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; line-height: 1.5; color: var(--text); }
+.goal-pill .g-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+.youtube-grid { display: flex; flex-direction: column; gap: 10px; }
+.yt-item { display: flex; align-items: flex-start; gap: 12px; background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px; text-decoration: none; cursor: pointer; }
+.yt-thumb { width: 76px; height: 50px; border-radius: 6px; background: var(--red-bg); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--red-text); }
+.yt-info { flex: 1; min-width: 0; }
+.yt-title { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; margin-bottom: 3px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.yt-channel { font-size: 12px; color: var(--muted); }
+.yt-tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px; margin-top: 4px; }
+.tag-eta { background: var(--green-bg); color: var(--green-text); }
+.tag-market { background: var(--blue-bg); color: var(--blue-text); }
+.tag-ops { background: var(--amber-bg); color: var(--amber-text); }
+.tag-mindset { background: var(--gray-bg); color: var(--gray-text); }
+.checklist { display: flex; flex-direction: column; gap: 8px; }
+.check-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius-sm); background: var(--bg); border: 0.5px solid var(--border); cursor: pointer; transition: opacity 0.15s; }
+.check-item.done { opacity: 0.45; }
+.check-box { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--green-text); background: var(--surface); }
+.check-item.done .check-box { background: var(--green-bg); border-color: var(--green-text); }
+.check-label { font-size: 14px; color: var(--text); line-height: 1.4; }
+.check-item.done .check-label { text-decoration: line-through; color: var(--muted); }
+.notes-area { width: 100%; min-height: 120px; padding: 12px 14px; font-size: 14px; line-height: 1.65; color: var(--text); background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-sm); resize: vertical; font-family: inherit; outline: none; -webkit-overflow-scrolling: touch; }
+.notes-area:focus { border-color: var(--blue-text); }
+.notes-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.notes-status { font-size: 12px; color: var(--muted); }
+.notes-btn { font-size: 12px; font-weight: 600; color: var(--blue-text); background: var(--blue-bg); border: none; padding: 6px 14px; border-radius: 20px; cursor: pointer; }
+.notes-btn:disabled { opacity: 0.5; cursor: default; }
+.setup-screen { padding: 32px 16px; max-width: 600px; margin: 0 auto; }
+.setup-screen h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.02em; }
+.setup-screen p { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+.setup-screen input { width: 100%; padding: 14px 16px; font-size: 15px; border: 0.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); outline: none; margin-bottom: 12px; -webkit-appearance: none; }
+.btn { width: 100%; padding: 15px; font-size: 15px; font-weight: 600; border: none; border-radius: var(--radius-sm); background: var(--text); color: var(--bg); cursor: pointer; -webkit-appearance: none; transition: opacity 0.15s; }
+.btn:active { opacity: 0.75; }
+.loading-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 16px; }
+.spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--text); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 14px; color: var(--muted); }
+.error-box { background: var(--red-bg); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 16px; font-size: 14px; color: var(--red-text); margin-bottom: 12px; line-height: 1.5; }
+.bottom-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px 32px; max-width: 600px; margin: 0 auto; }
+.meta-text { font-size: 12px; color: var(--muted); }
+.text-btn { font-size: 13px; color: var(--muted); background: none; border: none; cursor: pointer; padding: 4px 0; }
+.content-area { display: none; }
+.content-area.visible { display: block; }
+</style>
+</head>
+<body>
+
+<div id="setup" class="setup-screen" style="display:none;">
+  <div class="date-line">One-time setup</div>
+  <h2>Morning System</h2>
+  <p>Enter your keys below. Both stay on your device only and are never in the code.</p>
+  <div class="card-label" style="margin-bottom:6px;">Anthropic API Key</div>
+  <input type="password" id="api-key-input" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" spellcheck="false" />
+  <div class="card-label" style="margin-bottom:6px;margin-top:12px;">Notion Integration Token</div>
+  <input type="password" id="notion-token-input" placeholder="ntn_..." autocomplete="off" autocorrect="off" spellcheck="false" />
+  <div id="setup-error" class="error-box" style="display:none;"></div>
+  <button class="btn" onclick="saveKey()">Save and start</button>
+</div>
+
+<div id="loading" class="loading-screen" style="display:none;">
+  <div class="spinner"></div>
+  <div class="loading-text">Building your brief...</div>
+</div>
+
+<div id="main" class="content-area">
+  <header>
+    <div class="date-line" id="date-display"></div>
+    <h1>Good morning, Alexander Jordain.</h1>
+  </header>
+
+  <div class="container">
+    <div id="error-display" class="error-box" style="display:none;"></div>
+    <div class="card">
+      <div class="card-label">Verse of the day</div>
+      <div class="verse-ref" id="verse-ref"></div>
+      <div class="verse-text" id="verse-text"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Mindset</div>
+      <div class="mindset-text" id="mindset-text"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Learning block</div>
+      <span class="track-badge" id="track-badge"></span>
+      <div class="learn-text" id="learn-text"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Today's one action</div>
+      <div class="action-box" id="action-text"></div>
+    </div>
+  </div>
+
+  <div class="section-title">Lift audio</div>
+  <div class="container">
+    <div class="card">
+      <div class="link-row">
+        <div class="link-icon icon-podcast">🎙</div>
+        <div>
+          <div class="link-title" id="audio-title"></div>
+          <div class="link-sub" id="audio-sub"></div>
+          <a id="audio-link" class="link-tap" href="#" target="_blank">Open in Podcasts ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Drive to work</div>
+  <div class="container">
+    <div class="card">
+      <div class="link-row">
+        <div class="link-icon icon-coffee">☕</div>
+        <div>
+          <div class="link-title">Morning Brew Daily</div>
+          <div class="link-sub">Today's business and markets news · ~20 min</div>
+          <a class="link-tap" href="https://podcasts.apple.com/us/podcast/morning-brew-daily/id1480059697" target="_blank" id="brew-link">Open in Podcasts ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Day checklist</div>
+  <div class="container">
+    <div class="card">
+      <div class="checklist" id="checklist"></div>
+    </div>
+  </div>
+
+  <div class="section-title">Daily notes</div>
+  <div class="container">
+    <div class="card">
+      <div class="card-label">What did you learn or move forward today?</div>
+      <textarea class="notes-area" id="notes-area" placeholder="Type anything — a deal insight, something from the podcast, a broker call takeaway, a course concept that clicked..."></textarea>
+      <div class="notes-meta">
+        <span class="notes-status" id="notes-status">Autosaved on your device</span>
+        <button class="notes-btn" id="notes-btn" onclick="copyAndOpenNotion()">Copy + Open Notion</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Why you are doing this</div>
+  <div class="container">
+    <div class="card">
+      <div class="goals-grid">
+        <div class="goal-pill"><div class="g-label">Wedding</div>Pay for it in full. Give Alyssa the day she deserves.</div>
+        <div class="goal-pill"><div class="g-label">Family</div>Support Alyssa. Build something she is proud to be part of.</div>
+        <div class="goal-pill"><div class="g-label">Net worth</div>$5M by 2035. First acquisition by 26. Portfolio by 32.</div>
+        <div class="goal-pill"><div class="g-label">Garage</div>Three cars. Earned, not financed on hope.</div>
+        <div class="goal-pill"><div class="g-label">Freedom</div>100% in the game. Never think about bills again.</div>
+        <div class="goal-pill"><div class="g-label">Legacy</div>Generational wealth. God's work. Take care of the people you love.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">When you need a minute</div>
+  <div class="container">
+    <div class="card">
+      <div class="card-label" style="margin-bottom:14px;">Curated — no scrolling required</div>
+      <div class="youtube-grid" id="yt-grid"></div>
+    </div>
+  </div>
+
+  <div class="bottom-row">
+    <div class="meta-text" id="generated-at"></div>
+    <div style="display:flex;gap:16px;">
+      <button class="text-btn" onclick="showSettings()">Settings</button>
+      <button class="text-btn" onclick="regenerate()">Regenerate</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const NOTION_TOKEN = localStorage.getItem('notion_token') || '';
+const NOTION_PAGE_ID = '32cfd071380980598b14ebb7f5592d49';
+
+const SYSTEM_PROMPT = `You are a personalized morning brief generator for Alexander Jordain, a 20-year-old entrepreneur in early-stage wealth building.
+
+PROFILE:
+- Accelerated MBA complete. DBA in Finance in progress. Defense is approximately 26 months away as of early 2026. Dissertation topic locked.
+- Full-time financial analyst at Oncura (healthcare) — builds CRMs, financial dashboards, integrates operational systems.
+- Getting married soon. Fiancee Alyssa graduates in approximately 14 months (mid-2027). After that, household income doubles. Tight financially until then ($12K saved).
+- Protestant Christian. Faith is real, central, not decorative.
+- Wakes at 6:30 or 7:30. Lifts 20-30 min, showers, 15 min drive to office. In by 8:45.
+- Moves fast. Learns by locking himself away and building. Dislikes vagueness and hype.
+
+PRIMARY GOAL: First business acquisition within 18-24 months. Target $1.5M, SBA 7(a) loan. Tier 1 industries: managed IT/MSPs, bookkeeping firms, niche B2B field services, retainer-based digital agencies.
+
+SECONDARY INTEREST: Quantitative markets — regime-adaptive capital allocation, volatility modeling, drawdown constraints. Intellectual fuel only, not primary path right now.
+
+DBA DISSERTATION: Value creation in sub-$5M service business acquisitions. What operational and financial interventions drive the most measurable value in the first 24 months post-close. Methodology: regression analysis in R.
+
+PERSONAL GOALS:
+- Pay for his wedding in full and give Alyssa the day she deserves
+- Support Alyssa and build a life she is proud of
+- $5M net worth by 2035. First acquisition by 26. Portfolio of businesses by 32.
+- Own his dream three-car garage, earned not leveraged on hope
+- Be so deep in the game that personal finance annoyances disappear entirely
+- Build generational wealth and a family legacy
+- Do God's work — give generously, support those in need, take care of the people he loves
+
+MINDSET SOURCES TO DRAW FROM:
+Alex Hormozi: volume and speed of iteration, price is a story, sell the vehicle not the destination, your network is your net worth, the cost of inaction.
+Naval Ravikant: specific knowledge, accountability and equity, play long-term games with long-term people, become the best in the world at something the world needs, judgment compounds.
+Harley Finkelstein: resilience over talent, showing up before you are ready, operators vs visionaries, the Shopify merchant mindset — every day you help someone else win.
+Elon Musk: first principles thinking, the mission justifies the obsession, compress timelines, physics is the limit not convention.
+Jeff Bezos: regret minimization, Day 1 mentality, disagree and commit, long-term thinking as competitive advantage.
+Jensen Huang: the company you build is the product, pain plus reflection equals progress, suffering builds character for founders.
+Reid Hoffman: launch before you are ready, blitzscaling, network effects compound, your reputation travels faster than you do.
+Tim Cook: operational excellence as strategy, details at scale, the quiet disciplined ones outlast the loud ones.
+General entrepreneurship: most people overestimate what they can do in one year and underestimate what they can do in ten. The goal is not to win a day, it is to stay in the game. Identity precedes behavior — decide who you are becoming and act from that identity today.
+
+PSYCHOLOGICAL PROFILE:
+- Risk: over-optimization and burnout from trying to do everything simultaneously
+- Needs permission to go shallow when bandwidth is genuinely low
+- Responds to directness and honesty, not motivation speak
+- Does not respond well to AI-sounding affirmations, hustle cliches, or hollow encouragement
+- Faith grounds him when ambition gets ahead of reality
+
+ROTATING TRACKS (do not repeat same track two days in a row):
+1. eta — deal mechanics, acquisition fundamentals, sourcing, SBA structure, valuation, broker relationships
+2. market — volatility modeling, regime detection, capital allocation, drawdown management
+3. operator — post-acquisition ops, systems building, people management, 100-day plans, cash flow management
+4. mindset — faith, patience vs urgency, long game thinking, stewardship, identity as an entrepreneur
+
+Generate a morning brief using EXACTLY this format with no additional text:
+
+VERSE_REF: [Book Chapter:Verse]
+VERSE_TEXT: [Verse text in NIV translation, no quotation marks]
+MINDSET: [3-4 sentences. Write like a trusted older brother who has built something real. Draw from the mindset sources listed above — reference a specific idea from one of them and connect it to Alexander's actual situation today. No cliches. No "you've got this." No "remember why you started." Just one real idea applied to where he actually is right now.]
+TRACK: [eta / market / operator / mindset]
+TRACK_LABEL: [ETA track / Markets track / Operator track / Mindset track]
+LEARN: [3-5 sentences. One specific practical concept for today's track. Real numbers, real tools, real frameworks. Nothing vague.]
+ACTION: [One thing he can do in under 15 minutes today. Name the exact site, search term, or step.]
+AUDIO_TITLE: [Specific episode title and show name. Favor: Acquiring Minds, Flirting With Models, My First Million, The Compound, Patrick Boyle, We Study Billionaires, Invest Like the Best, Founders podcast, How I Built This]
+AUDIO_SUB: [Show name · estimated length · one sentence on why it fits today]
+AUDIO_PODCAST_ID: [Apple Podcasts show ID. Use exact IDs: Acquiring Minds=1489162228, My First Million=1469759170, Founders=1141877104, Invest Like the Best=1154105909, Flirting With Models=1402620531, How I Built This=1150510297, Patrick Boyle On=1551422822, We Study Billionaires=928933489, The Compound And Friends=1483401702, Masters In Business=979428679, Tim Ferriss Show=863897795, Lex Fridman=1434243584, Smart Passive Income=383084001]
+
+Verse selection: NIV translation. Choose from Proverbs, Psalms, Ecclesiastes, Joshua, Romans, James, Matthew, Philippians, Luke. Choose something that speaks to the specific tension Alexander is navigating — urgency vs patience, faith vs ambition, discipline vs rest, stewardship vs risk. Do not repeat recently used verses.`;
+
+const CURATED_VIDEOS = [
+  { id:"c01", title:"The Unspoken Laws of Business That Nobody Tells You", channel:"Alex Hormozi", url:"https://www.youtube.com/results?search_query=alex+hormozi+unspoken+laws+business", tag:"ops", tagLabel:"Operator" },
+  { id:"c02", title:"How to Get Rich Without Getting Lucky", channel:"Naval Ravikant", url:"https://www.youtube.com/results?search_query=naval+ravikant+how+to+get+rich+without+getting+lucky", tag:"mindset", tagLabel:"Mindset" },
+  { id:"c03", title:"Walker Deibel — Buy Then Build: The ETA Masterclass", channel:"Acquiring Minds", url:"https://www.youtube.com/results?search_query=acquiring+minds+walker+deibel+buy+then+build", tag:"eta", tagLabel:"ETA" },
+  { id:"c04", title:"Jensen Huang: The Future Belongs to Those Who Build", channel:"Stanford GSB", url:"https://www.youtube.com/results?search_query=jensen+huang+stanford+gsb+future+belongs+build", tag:"mindset", tagLabel:"Mindset" },
+  { id:"c05", title:"The SBA 7a Loan Explained for First-Time Business Buyers", channel:"Acquira", url:"https://www.youtube.com/results?search_query=SBA+7a+loan+explained+first+time+business+buyers+acquira", tag:"eta", tagLabel:"ETA" },
+  { id:"c06", title:"How Quant Hedge Funds Actually Make Money", channel:"Patrick Boyle", url:"https://www.youtube.com/results?search_query=patrick+boyle+how+quant+hedge+funds+make+money", tag:"market", tagLabel:"Markets" },
+  { id:"c07", title:"Reid Hoffman: The Surprising Habits of Original Thinkers", channel:"Stanford eCorner", url:"https://www.youtube.com/results?search_query=reid+hoffman+surprising+habits+original+thinkers+stanford", tag:"mindset", tagLabel:"Mindset" },
+  { id:"c08", title:"I Bought a Boring Business — Here's What Actually Happened", channel:"RAVEN", url:"https://www.youtube.com/results?search_query=RAVEN+bought+boring+business+what+actually+happened", tag:"eta", tagLabel:"ETA" },
+  { id:"c09", title:"Harley Finkelstein on Building Shopify and Showing Up Before You're Ready", channel:"How I Built This", url:"https://www.youtube.com/results?search_query=harley+finkelstein+shopify+how+I+built+this", tag:"mindset", tagLabel:"Mindset" },
+  { id:"c10", title:"How Volatility Targeting Actually Works in Practice", channel:"Flirting With Models", url:"https://www.youtube.com/results?search_query=flirting+with+models+volatility+targeting+practice", tag:"market", tagLabel:"Markets" },
+  { id:"c11", title:"Jeff Bezos: Regret Minimization and the Long Game", channel:"Founders Mindset", url:"https://www.youtube.com/results?search_query=jeff+bezos+regret+minimization+long+game+talk", tag:"mindset", tagLabel:"Mindset" },
+  { id:"c12", title:"How to Buy a Small Business With No Money Down", channel:"Codie Sanchez", url:"https://www.youtube.com/results?search_query=codie+sanchez+buy+small+business+no+money+down", tag:"eta", tagLabel:"ETA" },
+  { id:"c13", title:"The 100-Day Plan Every Acquirer Needs", channel:"SMB Diligence", url:"https://www.youtube.com/results?search_query=100+day+plan+business+acquisition+SMB+post+close", tag:"ops", tagLabel:"Operator" },
+  { id:"c14", title:"Elon Musk on First Principles Thinking", channel:"TED", url:"https://www.youtube.com/results?search_query=elon+musk+first+principles+thinking+ted", tag:"mindset", tagLabel:"Mindset" },
+  { id:"c15", title:"From Operator to Owner: Lessons From 5 Acquisitions", channel:"Acquiring Minds", url:"https://www.youtube.com/results?search_query=acquiring+minds+operator+to+owner+five+acquisitions+lessons", tag:"eta", tagLabel:"ETA" },
+  { id:"c16", title:"Momentum Investing and Regime Detection Explained", channel:"Alpha Architect", url:"https://www.youtube.com/results?search_query=alpha+architect+momentum+regime+detection+explained", tag:"market", tagLabel:"Markets" },
+  { id:"c17", title:"How to Build Systems in a Business You Just Bought", channel:"ETA Playbook", url:"https://www.youtube.com/results?search_query=build+systems+business+you+just+bought+acquisition+operator", tag:"ops", tagLabel:"Operator" },
+  { id:"c18", title:"My First Million: The Boring Business Blueprint", channel:"My First Million", url:"https://www.youtube.com/results?search_query=my+first+million+boring+business+blueprint+acquisition", tag:"eta", tagLabel:"ETA" },
+  { id:"c19", title:"Tim Cook on Operational Excellence and Quiet Discipline", channel:"Stanford GSB", url:"https://www.youtube.com/results?search_query=tim+cook+stanford+gsb+operational+excellence+discipline", tag:"ops", tagLabel:"Operator" },
+  { id:"c20", title:"How to Value a Small Business Before You Buy It", channel:"Codie Sanchez", url:"https://www.youtube.com/results?search_query=codie+sanchez+how+to+value+small+business+before+buying", tag:"eta", tagLabel:"ETA" },
+  { id:"c21", title:"Naval: Specific Knowledge Is the Moat No One Can Copy", channel:"Naval Clips", url:"https://www.youtube.com/results?search_query=naval+ravikant+specific+knowledge+moat+wealth+creation", tag:"mindset", tagLabel:"Mindset" },
+  { id:"c22", title:"What Drawdown Control Actually Looks Like in a Real Portfolio", channel:"ReSolve Asset Management", url:"https://www.youtube.com/results?search_query=resolve+asset+management+drawdown+control+real+portfolio", tag:"market", tagLabel:"Markets" },
+  { id:"c23", title:"The Founders Podcast: Sam Walton — Made in America", channel:"Founders", url:"https://www.youtube.com/results?search_query=founders+podcast+sam+walton+made+in+america+david+senra", tag:"mindset", tagLabel:"Mindset" },
+  { id:"c24", title:"Normalizing EBITDA: What Sellers Hide and How to Find It", channel:"SMB Diligence", url:"https://www.youtube.com/results?search_query=normalizing+EBITDA+sellers+hide+small+business+acquisition", tag:"eta", tagLabel:"ETA" },
+  { id:"c25", title:"How Market Regimes Actually Change and What To Do About It", channel:"ReSolve Asset Management", url:"https://www.youtube.com/results?search_query=resolve+asset+management+market+regimes+change+allocation", tag:"market", tagLabel:"Markets" },
+  { id:"c26", title:"The Psychology of Money — Key Ideas", channel:"Morgan Housel", url:"https://www.youtube.com/results?search_query=morgan+housel+psychology+of+money+key+ideas+talk", tag:"mindset", tagLabel:"Mindset" },
+  { id:"c27", title:"How to Find Off-Market Business Deals", channel:"Codie Sanchez", url:"https://www.youtube.com/results?search_query=codie+sanchez+find+off+market+business+deals", tag:"eta", tagLabel:"ETA" },
+  { id:"c28", title:"Building Systems That Run Without You", channel:"Alex Hormozi", url:"https://www.youtube.com/results?search_query=alex+hormozi+building+systems+run+without+you", tag:"ops", tagLabel:"Operator" },
+  { id:"c29", title:"Factor Investing and Momentum Explained Simply", channel:"Patrick Boyle", url:"https://www.youtube.com/results?search_query=patrick+boyle+factor+investing+momentum+explained", tag:"market", tagLabel:"Markets" },
+  { id:"c30", title:"What No One Tells You About Owning a Small Business", channel:"Acquiring Minds", url:"https://www.youtube.com/results?search_query=acquiring+minds+what+no+one+tells+you+owning+small+business", tag:"eta", tagLabel:"ETA" },
+  { id:"c31", title:"How Great Operators Think About Cash Flow", channel:"My First Million", url:"https://www.youtube.com/results?search_query=my+first+million+how+operators+think+about+cash+flow", tag:"ops", tagLabel:"Operator" },
+];
+
+const CHECKLIST = [
+  "Read verse and mindset",
+  "Complete lift",
+  "Morning Brew on the drive in",
+  "Do today's one action",
+  "Log what you learned or moved forward today"
+];
+
+function getToday() { return new Date().toDateString(); }
+
+function getStoredBrief() {
+  try {
+    const s = localStorage.getItem('morning_brief');
+    if (!s) return null;
+    const p = JSON.parse(s);
+    return p.date === getToday() ? p : null;
+  } catch { return null; }
+}
+
+function storeBrief(brief) {
+  try {
+    const data = { date: getToday(), brief, timestamp: Date.now() };
+    localStorage.setItem('morning_brief', JSON.stringify(data));
+    const hist = JSON.parse(localStorage.getItem('brief_history') || '[]');
+    hist.unshift({ date: data.date, track: brief.track });
+    localStorage.setItem('brief_history', JSON.stringify(hist.slice(0, 14)));
+  } catch {}
+}
+
+function getApiKey() { return localStorage.getItem('anthropic_api_key') || ''; }
+
+function saveKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  const ntn = document.getElementById('notion-token-input').value.trim();
+  const e = document.getElementById('setup-error');
+  if (!key.startsWith('sk-ant-')) {
+    e.textContent = 'Anthropic key should start with sk-ant-';
+    e.style.display = 'block'; return;
+  }
+  if (ntn && !ntn.startsWith('ntn_') && !ntn.startsWith('secret_')) {
+    e.textContent = 'Notion token should start with ntn_ or secret_';
+    e.style.display = 'block'; return;
+  }
+  localStorage.setItem('anthropic_api_key', key);
+  if (ntn) localStorage.setItem('notion_token', ntn);
+  e.style.display = 'none';
+  generateBrief();
+}
+
+function showSettings() {
+  document.getElementById('main').classList.remove('visible');
+  document.getElementById('setup').style.display = 'block';
+  document.getElementById('api-key-input').value = getApiKey();
+  const ntn = localStorage.getItem('notion_token') || '';
+  document.getElementById('notion-token-input').value = ntn;
+}
+
+function parseBrief(text) {
+  const get = function(key) {
+    var m = text.match(new RegExp(key + ':\\s*(.+?)(?=\\n[A-Z_]+:|$)', 's'));
+    return m ? m[1].trim() : '';
+  };
+  return {
+    verseRef: get('VERSE_REF'), verseText: get('VERSE_TEXT'),
+    mindset: get('MINDSET'), track: get('TRACK').toLowerCase().trim(),
+    trackLabel: get('TRACK_LABEL'), learn: get('LEARN'),
+    action: get('ACTION'), audioTitle: get('AUDIO_TITLE'),
+    audioSub: get('AUDIO_SUB'), audioPodcastId: get('AUDIO_PODCAST_ID'),
+  };
+}
+
+function trackClass(t) {
+  return ({eta:'track-eta',market:'track-market',operator:'track-operator',mindset:'track-mindset'})[t] || 'track-eta';
+}
+
+function buildApplePodcastsLink(podcastId, title) {
+  if (podcastId && podcastId.match(/^\d+$/)) {
+    return 'https://podcasts.apple.com/us/podcast/id' + podcastId;
+  }
+  return 'https://podcasts.apple.com/search?term=' + encodeURIComponent(title || 'Acquiring Minds');
+}
+
+function buildChecklist() {
+  const key = 'cl_' + getToday();
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(key) || '{}'); } catch {}
+  const el = document.getElementById('checklist');
+  el.innerHTML = '';
+  CHECKLIST.forEach(function(item, i) {
+    var done = !!state[i];
+    var div = document.createElement('div');
+    div.className = 'check-item' + (done ? ' done' : '');
+    div.innerHTML = '<div class="check-box">' + (done ? '✓' : '') + '</div><div class="check-label">' + item + '</div>';
+    div.onclick = function() {
+      state[i] = !state[i];
+      try { localStorage.setItem(key, JSON.stringify(state)); } catch {}
+      buildChecklist();
+    };
+    el.appendChild(div);
+  });
+}
+
+function loadNotes() {
+  const key = 'notes_' + getToday();
+  var saved = '';
+  try { saved = localStorage.getItem(key) || ''; } catch {}
+  document.getElementById('notes-area').value = saved;
+  if (saved) {
+    document.getElementById('notes-status').textContent = 'Draft saved locally';
+  }
+}
+
+function autoSaveNotes() {
+  const key = 'notes_' + getToday();
+  var val = document.getElementById('notes-area').value;
+  try { localStorage.setItem(key, val); } catch {}
+  document.getElementById('notes-status').textContent = 'Draft saved locally';
+}
+
+function copyAndOpenNotion() {
+  var notes = document.getElementById('notes-area').value.trim();
+  if (!notes) {
+    document.getElementById('notes-status').textContent = 'Nothing to copy yet';
+    return;
+  }
+  var today = new Date();
+  var dateStr = today.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
+  var formatted = dateStr + '\n\n' + notes;
+  var btn = document.getElementById('notes-btn');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(formatted).then(function() {
+      document.getElementById('notes-status').textContent = 'Copied — opening Notion...';
+      btn.textContent = 'Copied!';
+      setTimeout(function() {
+        window.open('https://www.notion.so/32cfd071380980598b14ebb7f5592d49', '_blank');
+        btn.textContent = 'Copy + Open Notion';
+      }, 600);
+    }).catch(function() {
+      document.getElementById('notes-status').textContent = 'Copy failed — try selecting and copying manually';
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = formatted;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try {
+      document.execCommand('copy');
+      document.getElementById('notes-status').textContent = 'Copied — opening Notion...';
+      btn.textContent = 'Copied!';
+      setTimeout(function() {
+        window.open('https://www.notion.so/32cfd071380980598b14ebb7f5592d49', '_blank');
+        btn.textContent = 'Copy + Open Notion';
+      }, 600);
+    } catch(e) {
+      document.getElementById('notes-status').textContent = 'Select the text above and copy manually';
+    }
+    document.body.removeChild(ta);
+  }
+}
+
+function buildYoutube() {
+  var seen = [];
+  try { seen = JSON.parse(localStorage.getItem('yt_seen') || '[]'); } catch {}
+  var available = CURATED_VIDEOS.filter(function(v) { return seen.indexOf(v.id) === -1; });
+  var pool = available.length >= 4 ? available : CURATED_VIDEOS;
+  var shuffled = pool.slice().sort(function() { return 0.5 - Math.random(); });
+  var picks = shuffled.slice(0, 4);
+  var newSeen = seen.concat(picks.map(function(p) { return p.id; })).slice(-30);
+  try { localStorage.setItem('yt_seen', JSON.stringify(newSeen)); } catch {}
+  var grid = document.getElementById('yt-grid');
+  grid.innerHTML = '';
+  picks.forEach(function(v) {
+    var tagCls = ({eta:'tag-eta',market:'tag-market',ops:'tag-ops',mindset:'tag-mindset'})[v.tag] || 'tag-eta';
+    var a = document.createElement('a');
+    a.className = 'yt-item';
+    a.href = v.url;
+    a.target = '_blank';
+    a.innerHTML = '<div class="yt-thumb">▶</div><div class="yt-info"><div class="yt-title">' + v.title + '</div><div class="yt-channel">' + v.channel + '</div><span class="yt-tag ' + tagCls + '">' + v.tagLabel + '</span></div>';
+    grid.appendChild(a);
+  });
+}
+
+function renderBrief(brief, timestamp) {
+  document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-US', {weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('verse-ref').textContent = brief.verseRef;
+  document.getElementById('verse-text').textContent = brief.verseText;
+  document.getElementById('mindset-text').textContent = brief.mindset;
+  var badge = document.getElementById('track-badge');
+  badge.textContent = brief.trackLabel || brief.track;
+  badge.className = 'track-badge ' + trackClass(brief.track);
+  document.getElementById('learn-text').textContent = brief.learn;
+  document.getElementById('action-text').textContent = brief.action;
+  document.getElementById('audio-title').textContent = brief.audioTitle;
+  document.getElementById('audio-sub').textContent = brief.audioSub;
+  document.getElementById('audio-link').href = buildApplePodcastsLink(brief.audioPodcastId, brief.audioTitle);
+  if (timestamp) {
+    var t = new Date(timestamp);
+    document.getElementById('generated-at').textContent = 'Generated at ' + t.toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'});
+  }
+  buildChecklist();
+  loadNotes();
+  buildYoutube();
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('error-display').style.display = 'none';
+  document.getElementById('main').classList.add('visible');
+  var notesArea = document.getElementById('notes-area');
+  notesArea.addEventListener('input', autoSaveNotes);
+}
+
+function getRecentTracks() {
+  try {
+    return JSON.parse(localStorage.getItem('brief_history') || '[]').slice(0,3).map(function(h){return h.track;}).join(', ');
+  } catch { return ''; }
+}
+
+async function generateBrief(force) {
+  if (!force) {
+    var stored = getStoredBrief();
+    if (stored) { renderBrief(stored.brief, stored.timestamp); return; }
+  }
+  var key = getApiKey();
+  if (!key) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('setup').style.display = 'block';
+    return;
+  }
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('main').classList.remove('visible');
+  document.getElementById('loading').style.display = 'flex';
+  var recentTracks = getRecentTracks();
+  var userMsg = 'Generate today\'s morning brief for Alexander Jordain. Today is ' + new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}) + '.' + (recentTracks ? ' Recent tracks used: ' + recentTracks + '. Choose a different track today.' : '');
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1400,
+        system: SYSTEM_PROMPT,
+        messages: [{role:'user',content:userMsg}]
+      })
+    });
+    if (!res.ok) {
+      var err = await res.json().catch(function(){return {};});
+      throw new Error((err.error && err.error.message) ? err.error.message : 'API error ' + res.status);
+    }
+    var data = await res.json();
+    var text = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text : '';
+    var brief = parseBrief(text);
+    if (!brief.verseRef || !brief.mindset) throw new Error('Incomplete response. Tap Regenerate.');
+    storeBrief(brief);
+    renderBrief(brief, Date.now());
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('main').classList.add('visible');
+    buildChecklist();
+    loadNotes();
+    buildYoutube();
+    var ed = document.getElementById('error-display');
+    ed.textContent = 'Could not generate brief: ' + e.message;
+    ed.style.display = 'block';
+    document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  }
+}
+
+function regenerate() {
+  localStorage.removeItem('morning_brief');
+  generateBrief(true);
+}
+
+window.onload = function() {
+  if (!getApiKey()) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('setup').style.display = 'block';
+  } else {
+    document.getElementById('loading').style.display = 'flex';
+    generateBrief();
+  }
+};
+</script>
+</body>
+</html>
