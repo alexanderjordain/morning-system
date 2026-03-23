@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Morning System</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f9f8f6; --surface: #ffffff; --border: rgba(0,0,0,0.08);
+  --text: #1a1a1a; --muted: #888;
+  --green-bg: #edf7f0; --green-text: #1a6b3c;
+  --blue-bg: #e8f0fb; --blue-text: #1a4a8a;
+  --amber-bg: #fdf3e0; --amber-text: #7a4f00;
+  --gray-bg: #f0efed; --gray-text: #444;
+  --red-bg: #fdf0f0; --red-text: #8a1a1a;
+  --radius: 14px; --radius-sm: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111110; --surface: #1c1c1a; --border: rgba(255,255,255,0.08);
+    --text: #f0ede8; --muted: #666;
+    --green-bg: #0d2e1a; --green-text: #5ecf8a;
+    --blue-bg: #0d1e3a; --blue-text: #7ab4f5;
+    --amber-bg: #2a1e08; --amber-text: #f5c060;
+    --gray-bg: #242422; --gray-text: #aaa;
+    --red-bg: #2a0d0d; --red-text: #f58080;
+  }
+}
+body {
+  background: var(--bg); color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px; line-height: 1.6; min-height: 100vh;
+  padding: env(safe-area-inset-top, 16px) 0 env(safe-area-inset-bottom, 32px);
+}
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px; }
+header { padding: 24px 16px 12px; max-width: 600px; margin: 0 auto; }
+.date-line { font-size: 11px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+h1 { font-size: 22px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+.section-title { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 20px 16px 8px; max-width: 600px; margin: 0 auto; }
+.card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 10px; }
+.card-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.verse-ref { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+.verse-text { font-size: 16px; line-height: 1.65; color: var(--text); font-style: italic; }
+.mindset-text { font-size: 15px; line-height: 1.78; color: var(--text); }
+.track-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-bottom: 12px; }
+.track-eta { background: var(--green-bg); color: var(--green-text); }
+.track-market { background: var(--blue-bg); color: var(--blue-text); }
+.track-operator { background: var(--amber-bg); color: var(--amber-text); }
+.track-mindset { background: var(--gray-bg); color: var(--gray-text); }
+.learn-text { font-size: 15px; line-height: 1.78; color: var(--text); }
+.action-box { background: var(--bg); border-radius: var(--radius-sm); border: 0.5px solid var(--border); padding: 14px 16px; font-size: 14px; line-height: 1.65; color: var(--text); margin-top: 8px; }
+.link-row { display: flex; align-items: flex-start; gap: 14px; }
+.link-icon { width: 40px; height: 40px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; }
+.icon-podcast { background: var(--red-bg); }
+.link-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; line-height: 1.4; }
+.link-sub { font-size: 13px; color: var(--muted); line-height: 1.4; }
+.link-tap { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 600; color: var(--blue-text); background: var(--blue-bg); padding: 4px 12px; border-radius: 20px; text-decoration: none; }
+.goals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.goal-pill { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; line-height: 1.5; color: var(--text); }
+.goal-pill .g-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+.youtube-grid { display: flex; flex-direction: column; gap: 10px; }
+.yt-item { display: flex; align-items: flex-start; gap: 12px; background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px; text-decoration: none; cursor: pointer; }
+.yt-thumb { width: 76px; height: 50px; border-radius: 6px; background: var(--red-bg); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--red-text); }
+.yt-info { flex: 1; min-width: 0; }
+.yt-title { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; margin-bottom: 3px; }
+.yt-channel { font-size: 12px; color: var(--muted); }
+.yt-tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px; margin-top: 4px; }
+.tag-eta { background: var(--green-bg); color: var(--green-text); }
+.tag-market { background: var(--blue-bg); color: var(--blue-text); }
+.tag-ops { background: var(--amber-bg); color: var(--amber-text); }
+.checklist { display: flex; flex-direction: column; gap: 8px; }
+.check-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius-sm); background: var(--bg); border: 0.5px solid var(--border); cursor: pointer; transition: opacity 0.15s; }
+.check-item.done { opacity: 0.45; }
+.check-box { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--green-text); background: var(--surface); }
+.check-item.done .check-box { background: var(--green-bg); border-color: var(--green-text); }
+.check-label { font-size: 14px; color: var(--text); line-height: 1.4; }
+.check-item.done .check-label { text-decoration: line-through; color: var(--muted); }
+.setup-screen { padding: 32px 16px; max-width: 600px; margin: 0 auto; }
+.setup-screen h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.02em; }
+.setup-screen p { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+.setup-screen input { width: 100%; padding: 14px 16px; font-size: 15px; border: 0.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); outline: none; margin-bottom: 12px; -webkit-appearance: none; }
+.btn { width: 100%; padding: 15px; font-size: 15px; font-weight: 600; border: none; border-radius: var(--radius-sm); background: var(--text); color: var(--bg); cursor: pointer; -webkit-appearance: none; transition: opacity 0.15s; }
+.btn:active { opacity: 0.75; }
+.loading-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 16px; }
+.spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--text); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 14px; color: var(--muted); }
+.error-box { background: var(--red-bg); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 16px; font-size: 14px; color: var(--red-text); margin-bottom: 12px; line-height: 1.5; }
+.bottom-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px 32px; max-width: 600px; margin: 0 auto; }
+.meta-text { font-size: 12px; color: var(--muted); }
+.text-btn { font-size: 13px; color: var(--muted); background: none; border: none; cursor: pointer; padding: 4px 0; }
+.content-area { display: none; }
+.content-area.visible { display: block; }
+</style>
+</head>
+<body>
+
+<div id="setup" class="setup-screen" style="display:none;">
+  <div class="date-line">One-time setup</div>
+  <h2>Morning System</h2>
+  <p>Enter your Anthropic API key. It stays on your device only. Find it at console.anthropic.com under API Keys.</p>
+  <input type="password" id="api-key-input" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" spellcheck="false" />
+  <div id="setup-error" class="error-box" style="display:none;"></div>
+  <button class="btn" onclick="saveKey()">Save and start</button>
+</div>
+
+<div id="loading" class="loading-screen" style="display:none;">
+  <div class="spinner"></div>
+  <div class="loading-text">Building your brief...</div>
+</div>
+
+<div id="main" class="content-area">
+  <header>
+    <div class="date-line" id="date-display"></div>
+    <h1>Good morning, Alexander Jordain.</h1>
+  </header>
+
+  <div class="container">
+    <div id="error-display" class="error-box" style="display:none;"></div>
+    <div class="card">
+      <div class="card-label">Verse of the day</div>
+      <div class="verse-ref" id="verse-ref"></div>
+      <div class="verse-text" id="verse-text"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Mindset</div>
+      <div class="mindset-text" id="mindset-text"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Learning block</div>
+      <span class="track-badge" id="track-badge"></span>
+      <div class="learn-text" id="learn-text"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Today's one action</div>
+      <div class="action-box" id="action-text"></div>
+    </div>
+  </div>
+
+  <div class="section-title">Lift audio</div>
+  <div class="container">
+    <div class="card">
+      <div class="link-row">
+        <div class="link-icon icon-podcast">🎙</div>
+        <div>
+          <div class="link-title" id="audio-title"></div>
+          <div class="link-sub" id="audio-sub"></div>
+          <a id="audio-link" class="link-tap" href="#" target="_blank">Open in Podcasts ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Drive to work</div>
+  <div class="container">
+    <div class="card">
+      <div class="link-row">
+        <div class="link-icon icon-podcast">☕</div>
+        <div>
+          <div class="link-title">Morning Brew Daily</div>
+          <div class="link-sub">Today's business and markets news · ~20 min</div>
+          <a class="link-tap" href="https://podcasts.apple.com/us/podcast/morning-brew-daily/id1555311906" target="_blank">Open in Podcasts ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Day checklist</div>
+  <div class="container">
+    <div class="card">
+      <div class="checklist" id="checklist"></div>
+    </div>
+  </div>
+
+  <div class="section-title">Why you are doing this</div>
+  <div class="container">
+    <div class="card">
+      <div class="goals-grid">
+        <div class="goal-pill"><div class="g-label">Wedding</div>Pay for it in full. Give Alyssa the day she deserves.</div>
+        <div class="goal-pill"><div class="g-label">Family</div>Support Alyssa. Build something she is proud to be part of.</div>
+        <div class="goal-pill"><div class="g-label">Net worth</div>$5M by 2035. First acquisition by 26. Portfolio by 32.</div>
+        <div class="goal-pill"><div class="g-label">Garage</div>Three cars. Earned, not financed on hope.</div>
+        <div class="goal-pill"><div class="g-label">Freedom</div>100% in the game. Never think about bills again.</div>
+        <div class="goal-pill"><div class="g-label">Legacy</div>Generational wealth. God's work. Take care of the people you love.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">When you need a minute</div>
+  <div class="container">
+    <div class="card">
+      <div class="card-label" style="margin-bottom:14px;">Curated — no scrolling required</div>
+      <div class="youtube-grid" id="yt-grid"></div>
+    </div>
+  </div>
+
+  <div class="bottom-row">
+    <div class="meta-text" id="generated-at"></div>
+    <div style="display:flex;gap:16px;">
+      <button class="text-btn" onclick="showSettings()">Settings</button>
+      <button class="text-btn" onclick="regenerate()">Regenerate</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SYSTEM_PROMPT = `You are a personalized morning brief generator for Alexander Jordain, a 20-year-old entrepreneur in early-stage wealth building.
+
+PROFILE:
+- Accelerated MBA complete. DBA in Finance in progress, defends Spring 2028.
+- Full-time financial analyst at Oncura (healthcare) — builds CRMs, financial dashboards, integrates operational systems.
+- Getting married soon. Fiancee Alyssa finishes school in about 15 months. Tight financially ($12K saved). Her parents contributing to the wedding.
+- Protestant Christian. Faith is real and central, not decorative.
+- Wakes up at 6:30 or 7:30. Lifts 20-30 min, showers, drives 15 min to office. In by 8:45.
+- Moves fast. Learns by locking himself away and building. Dislikes vagueness and hype.
+
+PRIMARY GOAL: First business acquisition within 18-24 months. Target $1.5M purchase price. SBA 7(a) loan. Tier 1 industries: managed IT/MSPs, bookkeeping firms, niche B2B field services, retainer-based digital agencies.
+
+SECONDARY INTEREST: Quantitative markets. Regime-adaptive capital allocation, volatility modeling, drawdown constraints. Intellectual fuel only, not the primary path right now.
+
+DBA DISSERTATION: Value creation in sub-$5M service business acquisitions. What operational and financial interventions drive the most measurable value in the first 24 months post-close. Methodology: regression analysis in R.
+
+PERSONAL GOALS:
+- Pay for his wedding in full
+- Support Alyssa and build a life she is proud of
+- $5M net worth by 2035. First acquisition by 26. Portfolio of businesses by 32.
+- Own his dream three-car garage, earned not leveraged
+- Be so focused on building that personal finance annoyances disappear entirely — bills handled, mind free
+- Build generational wealth and a family legacy
+- Do God's work — give generously, support those in need, take care of the people he loves
+
+PSYCHOLOGICAL PROFILE:
+- Risk: over-optimization and burnout from trying to do everything simultaneously
+- Needs permission to go shallow when bandwidth is genuinely low
+- Responds to directness and honesty, not motivation speak
+- Does not respond well to AI-sounding affirmations, hustle cliches, or generic encouragement
+- Faith grounds him when ambition gets ahead of reality
+
+ROTATING TRACKS (do not repeat same track two days in a row):
+1. eta — deal mechanics, acquisition fundamentals, sourcing, SBA structure, valuation, broker relationships
+2. market — volatility modeling, regime detection, capital allocation, drawdown management (intellectual, not action-oriented today)
+3. operator — post-acquisition ops, systems building, people management, 100-day plans, cash flow management
+4. mindset — faith, patience vs urgency, long game thinking, stewardship, identity as an entrepreneur
+
+Generate a morning brief using EXACTLY this format with no additional text before or after:
+
+VERSE_REF: [Book Chapter:Verse]
+VERSE_TEXT: [Verse text, ESV or KJV, no quotation marks]
+MINDSET: [3-4 sentences. Write like a trusted older brother who has actually built something, not a coach. Direct and honest. Reference Alexander's real situation: the wedding, Alyssa, Oncura, the acquisition goal, the DBA. Connect naturally to the verse. No cliches. No "remember why you started." No "you've got this." Just honest perspective on where he is and what matters today.]
+TRACK: [eta / market / operator / mindset]
+TRACK_LABEL: [ETA track / Markets track / Operator track / Mindset track]
+LEARN: [3-5 sentences. One specific practical concept. Real numbers, real tools, real frameworks. Nothing vague. If ETA: deal mechanics, SBA math, sourcing tactics, broker relationships. If market: a specific modeling or allocation concept. If operator: a specific post-close process or system. If mindset: one concrete idea about identity, stewardship, or the long game rooted in his faith and his goals.]
+ACTION: [One thing he can do in under 15 minutes today. Name the exact site, search term, or step. No generalities.]
+AUDIO_TITLE: [Specific episode title or show name. Favor: Acquiring Minds, Flirting With Models, How I Built This, My First Million, The Compound, Patrick Boyle, We Study Billionaires, Invest Like the Best]
+AUDIO_SUB: [Show name · estimated length · one sentence on why it fits today specifically]
+AUDIO_SEARCH: [Exact search string to find this on Apple Podcasts, e.g. "Acquiring Minds Walker Deibel buy then build"]
+
+Verse selection: Choose from Proverbs, Psalms, Ecclesiastes, Joshua, Romans, James, Matthew, Philippians, Luke. Choose something that speaks to the specific tension Alexander is navigating today between urgency and patience, faith and ambition, building wealth and staying grounded. Do not repeat recently used verses.`;
+
+const CURATED_VIDEOS = [
+  { id:"v1", title:"I Bought This Boring Business 1 Year Ago — How Much Is It Making Today?", channel:"RAVEN", url:"https://www.youtube.com/results?search_query=RAVEN+boring+business+1+year+making+today", tag:"eta", tagLabel:"ETA" },
+  { id:"v2", title:"How I Started My Hedge Fund", channel:"The Compound", url:"https://www.youtube.com/results?search_query=compound+how+I+started+my+hedge+fund", tag:"market", tagLabel:"Markets" },
+  { id:"v3", title:"Buy Then Build — Full Audiobook (Walker Deibel)", channel:"Page Ware", url:"https://www.youtube.com/results?search_query=buy+then+build+walker+deibel+full+audiobook", tag:"eta", tagLabel:"ETA" },
+  { id:"v4", title:"The Money Formula I Used to Actually Get Rich", channel:"Alex Hormozi", url:"https://www.youtube.com/results?search_query=alex+hormozi+money+formula+actually+get+rich", tag:"ops", tagLabel:"Operator" },
+  { id:"v5", title:"Why I Shut Down My $7 Billion Hedge Fund", channel:"Odds On Podcast", url:"https://www.youtube.com/results?search_query=shut+down+7+billion+hedge+fund+odds+on+podcast", tag:"market", tagLabel:"Markets" },
+  { id:"v6", title:"How to Start and Scale Your Own Hedge Fund ft. Kevin Fu", channel:"Composer", url:"https://www.youtube.com/results?search_query=start+scale+hedge+fund+kevin+fu+composer+webinar", tag:"market", tagLabel:"Markets" },
+  { id:"v7", title:"From Broke to $1 Billion by 30", channel:"Davie Fogarty", url:"https://www.youtube.com/results?search_query=davie+fogarty+broke+to+billion+by+30", tag:"ops", tagLabel:"Operator" },
+  { id:"v8", title:"How to Grow Your Business So Fast in 2026 It Feels Illegal", channel:"Alex Hormozi", url:"https://www.youtube.com/results?search_query=alex+hormozi+grow+business+fast+2026+illegal", tag:"ops", tagLabel:"Operator" },
+  { id:"v9", title:"Christina Qi Started a Hedge Fund From Her Dorm Room", channel:"Odds On Podcast", url:"https://www.youtube.com/results?search_query=christina+qi+hedge+fund+dorm+room+odds+on", tag:"market", tagLabel:"Markets" },
+  { id:"v10", title:"How I Make $15,632/Week From 1 Boring Business", channel:"RAVEN", url:"https://www.youtube.com/results?search_query=RAVEN+15632+week+one+boring+business", tag:"eta", tagLabel:"ETA" },
+  { id:"v11", title:"You've Been Brainwashed to Buy Real Estate — Do This Instead", channel:"Alex Hormozi", url:"https://www.youtube.com/results?search_query=alex+hormozi+brainwashed+buy+real+estate+instead", tag:"eta", tagLabel:"ETA" },
+  { id:"v12", title:"Patrick Boyle: How Quant Funds Actually Work", channel:"Patrick Boyle", url:"https://www.youtube.com/results?search_query=patrick+boyle+how+quant+funds+actually+work", tag:"market", tagLabel:"Markets" },
+  { id:"v13", title:"The SBA Loan Process Explained for Business Buyers", channel:"Acquira", url:"https://www.youtube.com/results?search_query=SBA+loan+process+explained+business+acquisition+buyers", tag:"eta", tagLabel:"ETA" },
+  { id:"v14", title:"He Made Nearly $30M His Entire Career — How He Did It", channel:"CornelBafia", url:"https://www.youtube.com/results?search_query=cornelbafia+30+million+entire+career+how", tag:"ops", tagLabel:"Operator" },
+  { id:"v15", title:"Acquiring Minds: What I Wish I Knew Before My First Acquisition", channel:"Acquiring Minds", url:"https://www.youtube.com/results?search_query=acquiring+minds+what+I+wish+I+knew+first+acquisition", tag:"eta", tagLabel:"ETA" },
+  { id:"v16", title:"Inside Houston's Oil-Money Neighborhood", channel:"RocaNews", url:"https://www.youtube.com/results?search_query=inside+houston+oil+money+neighborhood+rocanews", tag:"ops", tagLabel:"Operator" },
+];
+
+const CHECKLIST = [
+  "Read verse and mindset",
+  "Complete lift",
+  "Morning Brew on the drive in",
+  "Do today's one action",
+  "Log one thing learned or moved forward today"
+];
+
+function getToday() { return new Date().toDateString(); }
+
+function getStoredBrief() {
+  try {
+    const s = localStorage.getItem('morning_brief');
+    if (!s) return null;
+    const p = JSON.parse(s);
+    return p.date === getToday() ? p : null;
+  } catch { return null; }
+}
+
+function storeBrief(brief) {
+  try {
+    const data = { date: getToday(), brief, timestamp: Date.now() };
+    localStorage.setItem('morning_brief', JSON.stringify(data));
+    const hist = JSON.parse(localStorage.getItem('brief_history') || '[]');
+    hist.unshift({ date: data.date, track: brief.track });
+    localStorage.setItem('brief_history', JSON.stringify(hist.slice(0, 14)));
+  } catch {}
+}
+
+function getApiKey() { return localStorage.getItem('anthropic_api_key') || ''; }
+
+function saveKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key.startsWith('sk-ant-')) {
+    const e = document.getElementById('setup-error');
+    e.textContent = 'Key should start with sk-ant-';
+    e.style.display = 'block';
+    return;
+  }
+  localStorage.setItem('anthropic_api_key', key);
+  document.getElementById('setup-error').style.display = 'none';
+  generateBrief();
+}
+
+function showSettings() {
+  document.getElementById('main').classList.remove('visible');
+  document.getElementById('setup').style.display = 'block';
+  document.getElementById('api-key-input').value = getApiKey();
+}
+
+function parseBrief(text) {
+  const get = (key) => {
+    const m = text.match(new RegExp(key + ':\\s*(.+?)(?=\\n[A-Z_]+:|$)', 's'));
+    return m ? m[1].trim() : '';
+  };
+  return {
+    verseRef: get('VERSE_REF'), verseText: get('VERSE_TEXT'),
+    mindset: get('MINDSET'), track: get('TRACK').toLowerCase().trim(),
+    trackLabel: get('TRACK_LABEL'), learn: get('LEARN'),
+    action: get('ACTION'), audioTitle: get('AUDIO_TITLE'),
+    audioSub: get('AUDIO_SUB'), audioSearch: get('AUDIO_SEARCH'),
+  };
+}
+
+function trackClass(t) {
+  return ({eta:'track-eta',market:'track-market',operator:'track-operator',mindset:'track-mindset'})[t] || 'track-eta';
+}
+
+function buildChecklist() {
+  const key = 'cl_' + getToday();
+  let state = {};
+  try { state = JSON.parse(localStorage.getItem(key) || '{}'); } catch {}
+  const el = document.getElementById('checklist');
+  el.innerHTML = '';
+  CHECKLIST.forEach((item, i) => {
+    const done = !!state[i];
+    const div = document.createElement('div');
+    div.className = 'check-item' + (done ? ' done' : '');
+    div.innerHTML = '<div class="check-box">' + (done ? '✓' : '') + '</div><div class="check-label">' + item + '</div>';
+    div.onclick = function() {
+      state[i] = !state[i];
+      try { localStorage.setItem(key, JSON.stringify(state)); } catch {}
+      buildChecklist();
+    };
+    el.appendChild(div);
+  });
+}
+
+function buildYoutube() {
+  let seen = [];
+  try { seen = JSON.parse(localStorage.getItem('yt_seen') || '[]'); } catch {}
+  const available = CURATED_VIDEOS.filter(function(v) { return seen.indexOf(v.id) === -1; });
+  const pool = available.length >= 4 ? available : CURATED_VIDEOS;
+  const shuffled = pool.slice().sort(function() { return 0.5 - Math.random(); });
+  const picks = shuffled.slice(0, 4);
+  const newSeen = seen.concat(picks.map(function(p) { return p.id; })).slice(-20);
+  try { localStorage.setItem('yt_seen', JSON.stringify(newSeen)); } catch {}
+  const grid = document.getElementById('yt-grid');
+  grid.innerHTML = '';
+  picks.forEach(function(v) {
+    const tagCls = {eta:'tag-eta',market:'tag-market',ops:'tag-ops'}[v.tag] || 'tag-eta';
+    const a = document.createElement('a');
+    a.className = 'yt-item';
+    a.href = v.url;
+    a.target = '_blank';
+    a.innerHTML = '<div class="yt-thumb">▶</div><div class="yt-info"><div class="yt-title">' + v.title + '</div><div class="yt-channel">' + v.channel + '</div><span class="yt-tag ' + tagCls + '">' + v.tagLabel + '</span></div>';
+    grid.appendChild(a);
+  });
+}
+
+function buildPodcastLink(search) {
+  return 'https://podcasts.apple.com/search?term=' + encodeURIComponent(search || 'Acquiring Minds podcast');
+}
+
+function renderBrief(brief, timestamp) {
+  document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-US', {weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('verse-ref').textContent = brief.verseRef;
+  document.getElementById('verse-text').textContent = brief.verseText;
+  document.getElementById('mindset-text').textContent = brief.mindset;
+  const badge = document.getElementById('track-badge');
+  badge.textContent = brief.trackLabel || brief.track;
+  badge.className = 'track-badge ' + trackClass(brief.track);
+  document.getElementById('learn-text').textContent = brief.learn;
+  document.getElementById('action-text').textContent = brief.action;
+  document.getElementById('audio-title').textContent = brief.audioTitle;
+  document.getElementById('audio-sub').textContent = brief.audioSub;
+  document.getElementById('audio-link').href = buildPodcastLink(brief.audioSearch || brief.audioTitle);
+  if (timestamp) {
+    const t = new Date(timestamp);
+    document.getElementById('generated-at').textContent = 'Generated at ' + t.toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'});
+  }
+  buildChecklist();
+  buildYoutube();
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('error-display').style.display = 'none';
+  document.getElementById('main').classList.add('visible');
+}
+
+function getRecentTracks() {
+  try {
+    return JSON.parse(localStorage.getItem('brief_history') || '[]').slice(0, 3).map(function(h) { return h.track; }).join(', ');
+  } catch { return ''; }
+}
+
+async function generateBrief(force) {
+  if (!force) {
+    const stored = getStoredBrief();
+    if (stored) { renderBrief(stored.brief, stored.timestamp); return; }
+  }
+  const key = getApiKey();
+  if (!key) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('setup').style.display = 'block';
+    return;
+  }
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('main').classList.remove('visible');
+  document.getElementById('loading').style.display = 'flex';
+  const recentTracks = getRecentTracks();
+  const userMsg = 'Generate today\'s morning brief for Alexander Jordain. Today is ' + new Date().toLocaleDateString('en-US', {weekday:'long',month:'long',day:'numeric',year:'numeric'}) + '.' + (recentTracks ? ' Recent tracks used: ' + recentTracks + '. Choose a different track today.' : '');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1200,
+        system: SYSTEM_PROMPT,
+        messages: [{role:'user',content:userMsg}]
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(function() { return {}; });
+      throw new Error(err.error && err.error.message ? err.error.message : 'API error ' + res.status);
+    }
+    const data = await res.json();
+    const text = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text : '';
+    const brief = parseBrief(text);
+    if (!brief.verseRef || !brief.mindset) throw new Error('Incomplete response. Tap Regenerate.');
+    storeBrief(brief);
+    renderBrief(brief, Date.now());
+  } catch (err) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('main').classList.add('visible');
+    buildChecklist();
+    buildYoutube();
+    const ed = document.getElementById('error-display');
+    ed.textContent = 'Could not generate brief: ' + err.message;
+    ed.style.display = 'block';
+    document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-US', {weekday:'long',month:'long',day:'numeric'});
+  }
+}
+
+function regenerate() {
+  localStorage.removeItem('morning_brief');
+  generateBrief(true);
+}
+
+window.onload = function() {
+  if (!getApiKey()) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('setup').style.display = 'block';
+  } else {
+    document.getElementById('loading').style.display = 'flex';
+    generateBrief();
+  }
+};
+</script>
+</body>
+</html>
